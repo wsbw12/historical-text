@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Text</title>
+</head>
+<body>
+
+    <!-- 链接 -->
+    <a href="#" id="showTextLink">Click to see historical text</a>
+
+    <!-- 文字内容 -->
+    <div id="historicalText" style="display: none;">
+        <p>6．向excel中读写
+
+#向excel中写入数据        excel打开的同时不要运行程序啊喂！
+import xlwt
+def write_excel():
+    #1.创建workbook对象
+    wk = xlwt.Workbook()        #   Workbook,W大写，()别忘了
+    #2.创建sheet
+    sheet = wk.add_sheet("sheeta")
+    #3.通过write()写数据，行索引从0开始，列下标从0开始
+    sheet.write(0,0,"编号")      #    sheet.write这里.write没有提示
+    sheet.write(0,1,"用户名")
+    sheet.write(0,2,"密码")
+    for i in range(1,1000):
+        sheet.write(i,0,i+1000)
+        sheet.write(i,1,"tom"+str(i))       #报文里不确定的都str()
+        sheet.write(i,2,"root")
+    wk.save("信息表.xls")
+#write_excel()
+
+#向excel中读取数据    了解即可，pandas更优
+import xlrd
+
+def read_excel():
+    wk = xlrd.open_workbook("信息表.xls")
+    #获取sheet
+    sheet = wk.sheet_by_name("sheeta")   #用name适合针对单个sheet操作
+    #sheet = wk.sheet_by_index()         #index从0开始，适合多个sheet情况
+    print(sheet.nrows,"行",sheet.ncols,"列")
+    print(sheet.row_values(0))
+    for i in range(0,sheet.nrows):
+        print(sheet.row_values(i))
+read_excel()
+
+6．文件读写
+如：考试时命令放在记事本，一行一条命令；或放在excel表中
+"""
+def write_file():
+    #1.文件路径（相对路径和绝对路径）
+    #2.文件读写权限w,r,b(binary二进制),a+(append追加)
+    #3.编码格式encoding
+
+    # 方法一写文件：打开，写，关闭
+    f= open("user.txt","w",encoding="utf-8")    #不是所有都需要设置encoding的！！了解下有哪些，utf-8可以有中文
+            # C:\Users\yushu
+            # "w"覆盖
+            # "a+"文件追加
+    f.write("abc,小明")
+    f.close()
+
+    #方法二：with
+    # with open("user.txt","w") as f:
+    #     f.write("abc")
+#write_file() #只是定义了函数，记得调用！
+
+def read_file():
+    f = open("user.txt","r",encoding="utf-8")
+    #方法一：全部读取完
+    # result = f.read()
+    # print(result)
+    #方法二：读取多行，返回列表          读取命令的方式！！
+    lines = f.readlines()
+    for line in lines:
+        print(line)
+    #方法三：读取一行
+    # result = f.readline()
+    # print(result)
+    # result = f.readline()
+    # print(result)
+
+    f.close()
+
+read_file()
+
+6.读取目录下文件内容
+import os   #系统库
+import time
+import random
+import pandas
+
+#os.write()
+#os.read()
+
+#一定要会！
+dirs1 = os.listdir("../.venv/")      #   ../返回上一级目录
+             #   读取当前文件夹下面，实在不行用绝对路径，Windows下直接复制粘贴，\需要转义，如..\\day02\\
+print(dirs1)
+
+def read ():
+    dirs2 = os.listdir("./")
+    for i in range (0,len(dirs2)):
+        #try:
+            f = open(dirs2[i],'r',errors='ignore')
+        #except:
+            content = f.readlines()
+            print('以下是',dirs2[i],'的内容')
+            print(content)
+#read()
+
+#   读取指定文件夹下所有文件的内容
+path = './'
+dirs = os.listdir(path)
+for file in dirs:
+    #print(path+file)
+    file_path = path + file
+    if file_path.endswith(".py"):
+        f = open(file_path,'r',encoding='utf-8')
+        print(file_path)
+        print(f.readlines())
+        f.close()
+    elif file_path.endswith(".xls"):
+        print(file_path)
+        df = pandas.read_excel(file_path)
+        print(df)
+    elif file_path.endswith(".csv"):
+        print(file_path)
+        df = pandas.read_csv(file_path)
+        print(df)
+
+7.数据统计练习
+pip install 库名 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+新建文件名为pandas.py会和库名源代码的一样，运行什么都报错，所以起名不要起和库名一样的
+"""
+import pandas as pd
+import matplotlib as plt
+
+#1.数据生成
+df = pd.DataFrame(
+    [
+           [1001,"小明",20,"男"],
+           [1002,"tom",22,None],        #None代表该值为空
+           [1003,"小红",18,"女"],
+           [1004,"张三",None,"男"],
+           [1005,"小王",26,"男"],
+           [1006,"小兰",22,"女"]
+    ],columns=["编号","姓名","年龄","性别"]
+)  #二维表，有行索引和列索引
+print(df)
+
+#2.查看基础信息
+print(df.shape) #查看行数和列数
+print(df.info())   #查看列名，后续可以指定列名     #点info查为方法，方法一定带()
+print(df.describe())    #查看可以计算的列
+print(df.head(3))      #查看前几行，默认5行
+print(df.tail(2))
+
+#3.根据行列查询，可加条件
+df = pd.read_csv("train.csv")   #返回为二维数据
+print(df.shape)
+print(df.info())
+print(df.head(3))
+#按列查询
+print(df['姓名'])
+print(df.姓名)    #和print(df['姓名'])作用一样
+print(df.loc[1:3,"姓名":"性别"]) #按区间去读行，列    从第二行到第四行，从第一列到最后一列；左闭右闭，全都包含
+print(df.loc[[2,4],['姓名','性别','年龄']])  #不连续的区间
+#查询年龄大于18岁的所有行
+print(df[df.年龄 > 18])       #df.年龄 > 18返回的是True、False
+#查询唯一值
+print(df.性别.unique())
+print(df['年龄'].count())     #报文里统计个数
+print(df.年龄.max())
+print(df.年龄.sum())
+print(df.年龄.min())
+print(df.年龄.mean())
+print(df.年龄.mode()[0])         #众数，输出元组格式:0    20.0
+
+#4.填充
+min = df.年龄.min()
+df['年龄'] = df['年龄'].fillna(min) #记得赋值
+print(df)
+#matplotlib
+df.plot(kind='bar')
+#plt.show()
+
+#性别填充众数
+df.性别 = df.性别.fillna(df.性别.mode()[0])
+#df['性别'] = df['性别'].fillna(df['性别'].mode()[0])
+print("下面是性别填充众数")
+print(df)
+
+#5.根据字段进度排序，生成一个新文件    pandas操作无法改变原文件内容
+df2 = df.sort_values(by='年龄',ascending=True)    #报文里也会使用，记得！！
+print(df2)
+df2.to_csv('new.csv')   #生成一个新的csv格式的文件
+
+"""
+考点梳理
+1、报文里按关键字提取
+2.1提取文件写入到excel方便，xlwd方便
+2.2输出的文件还需要排序，用pandas
+"""
+#Matplotlib可视化，大概率不考？
+
+8.三台设备批量下发配置
+import telnetlib
+import time
+def muti (host):
+    tel = telnetlib.Telnet(host,23)
+    #print(tel)
+    tel.read_until('Password:'.encode('utf-8'))
+    tel.write('Admin@123\n'.encode('utf-8'))
+    time.sleep(1)
+
+    tel.write('sys\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('int g1/0/8\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('undo shutdown\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('undo portswitch\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('ip add 192.168.10.254 24\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('commit\n'.encode('utf-8'))
+    time.sleep(1)
+    tel.write('dis ip int brie\n'.encode('utf-8'))
+    time.sleep(3)
+
+    print(tel.read_very_eager().decode('utf-8'))
+
+
+muti('192.168.56.100')
+muti('192.168.56.101')
+muti('192.168.56.102')
+
+8.设备连通tel
+#通过telnetlib连接交换机，并下发配置
+import telnetlib
+import time
+
+tel = telnetlib.Telnet('192.168.56.100',23) #类需要有对象，所以千万记得赋值！
+print(tel)
+tel.read_until(b"Password:")                    #读取命令行中的数据
+                                #tel.read_until("Password:") 会报错：TypeError: argument should be integer or bytes-like object, not 'str'
+tel.write('Admin@123\n'.encode('utf-8'))          #发送指令给交换机
+                                #write('Admin@123')会报错： TypeError: 'in <string>' requires string as left operand, not bytes
+time.sleep(1)                                   #给指定下发的时间
+
+tel.write('screen-length 0 temporary\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('sys\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('int g1/0/0\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('undo shutdown\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('undo portswitch\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('ip add 192.168.10.254 24\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('int g1/0/1\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('undo shutdown\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('undo portswitch\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('ip add 192.168.20.254 24\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('commit\n'.encode('utf-8'))
+time.sleep(1)
+
+tel.write('dis ip int brie \n'.encode('utf-8'))
+time.sleep(3)
+
+print(tel.read_very_eager().decode('utf-8'))
+
+tel.close()
+
+
+#两个登录方式：
+#1、密码方式；2、用户名和密码
+#可以通过抓包，tcp追踪流来看到密码
+
+9.设备连通para
+"""
+如果考题里有上传下载要求，肯定用paramiko
+"""
+import paramiko
+import time
+
+#1.下发配置
+def client():
+    client = paramiko.SSHClient()       #通过SSH连接客户端
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())      #注意查看源代码有没有return来看要不要赋值，有没有()
+    client.connect('192.168.56.102',22,'huawei','Admin@123')
+    cmd= client.invoke_shell()  #打开远程窗口
+    cmd.send('screen-length 0 temporary\n')     #.encode('utf-8')没报错就不加了
+    time.sleep(1)
+    cmd.send('sys\n')
+    time.sleep(1)
+    cmd.send('int Loopback0\n')
+    time.sleep(1)
+    cmd.send('ip add 1.1.1.1 32\n')
+    time.sleep(1)
+    cmd.send('commit\n')
+    time.sleep(1)
+    cmd.send('dis ip int brie\n')
+    time.sleep(3)
+    print(cmd.recv(65535).decode('utf-8'))
+    cmd.close()
+
+#2.将命令从文本中读取，然后进行下发
+def read_txt():
+    pass
+
+#3.下载文件
+#1)调用Transport()方法，2)建立连接，3)调用sftp，4)put上传get下载，5)关闭
+def downLoad():
+    trans = paramiko.Transport(('192.168.56.102',22))
+    trans.connect(None,'huawei','Admin@123')
+    sftp = paramiko.SFTPClient.from_transport(trans)           #sftp = paramiko.SFTPClient(trans)报错'Transport' object has no attribute 'send'
+    sftp.get('device.sys','device.sys')
+    trans.close()
+#downLoad()
+
+#4.上传文件
+def upLoad():
+    trans = paramiko.Transport(('192.168.56.102',22))
+    trans.connect(None,'huawei','Admin@123')
+    sftp = paramiko.SFTPClient.from_transport(trans)
+    #sftp.listdir()
+    sftp.put('train.csv','train.csv')
+    sftp.close()
+upLoad()
+
+10.snmp
+#pip install pysnmp==4.4.12 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+from pysnmp.hlapi import *
+
+result = getCmd(
+    SnmpEngine(),
+    UsmUserData(
+        'admin',
+        'Huawei@123',
+        'Huawei@123',
+        authProtocol=usmHMACSHAAuthProtocol,
+        privProtocol=usmAesCfb128Protocol),
+        UdpTransportTarget(('192.168.56.101',161)),
+        ContextData(),
+    ObjectType(ObjectIdentity('1.3.6.1.2.1.1.5.0'))     #注意是ObjectIdentity不是ObjectIdentifier
+)
+
+print(result)   #返回一个迭代器：<generator object getCmd at 0x000001ECBFB93CC0>
+#print(next(result)[3])
+#print(next(result)[3][0])   #next()函数从迭代器中逐个获取下一个元素
+
+#方法一：
+# a,b,c,d = next(result)
+# for mes in d:       #拿到列表直接遍历
+#     print(str(mes).split('=')[1].strip())
+
+#方法二：不知道a,b,c,d是什么数值什么数据类型,object type
+message = next(result)
+for m in message:
+    #print(m)
+    try:                #单个数字不能遍历，哪行代码报错，把try放在改行代码之上
+        for m2 in m:
+            print(str(m2).split('=')[1].strip())
+    except Exception as e:
+        print("非序列")
+
+11.netconf
+"""
+netconf的操作不用记，会提供文档，复制粘贴，改里面的内容即可
+<get>
+"""
+from ncclient import manager        #建立连接
+from ncclient.xml_ import to_ele    #将字符串格式转为xml格式
+
+def send_yang():
+    conn = manager.connect(             #这里的参数都没提示，需要记忆！！！
+        host='192.168.56.254',
+        port= 830,
+        username='huawei',
+        password='Admin@123',
+        #look_for_keys=False,       #可不记
+        #allow_agent=False,         #可不记
+        hostkey_verify=False,
+        device_params={"name":"huawei"}
+    )
+
+    config_create = """
+  <edit-config>
+    <target>
+      <running/>
+    </target>
+    <default-operation>merge</default-operation>
+    <error-option>rollback-on-error</error-option>
+    <config>
+      <vlan xmlns="http://www.huawei.com/netconf/vrp" content-version="1.0" format-version="1.0">
+        <vlans>
+          <vlan operation="create">
+            <vlanId>100</vlanId>
+            <vlanName>VLAN100</vlanName>
+            <vlanType>common</vlanType>
+          </vlan>
+        </vlans>
+      </vlan>
+    </config>
+  </edit-config>
+    """
+
+    config_get="""
+      <get>
+    <filter type="subtree">
+      <vlan xmlns="http://www.huawei.com/netconf/vrp" content-version="1.0" format-version="1.0">
+        <vlans>
+          <vlan>
+            <vlanId></vlanId>
+            <vlanName></vlanName>
+            <vlanType></vlanType>
+          </vlan>
+        </vlans>
+      </vlan>
+    </filter>
+  </get>
+    """
+
+    #cont1 = to_ele(config_create)
+    cont2 = to_ele(config_get)
+
+    #result1 = conn.rpc(cont1)
+    result2 = conn.rpc(cont2)
+
+    print('\n配置2响应\n',result2)
+    conn.close_session()
+
+send_yang()
+
+12.scapy介绍
+#pip install scapy
+from scapy.all import *
+from scapy.layers.inet import IP,TCP,UDP,Ether
+
+print(dir(scapy.layers))
+print('========')
+print(explore(scapy.layers.l2))
+print('===以下是IP=====')
+print(ls(IP))
+print('===以下是TCP=====')
+print(ls(TCP))
+print('===以下是UDP=====')
+print(ls(UDP))
+print('===以下是Ether=====')
+print(ls(Ether))
+
+12.scapy手工构建报文
+from scapy.all import *
+from scapy.layers.inet import IP,TCP,ICMP
+
+#手工构建报文
+pkt1 = (IP(src='192.168.56.1',dst='192.168.56.100',len=300)/TCP(sport=20,dport=80)) #   IP/协议   源代码里可以看有哪些字段可以设置，也可以用ls(IP)查看
+pkt2 = IP(src='192.168.56.1',dst='192.168.56.100')/ICMP()
+
+#print(pkt1.show())
+pkts = [pkt1,pkt2]
+#写
+#wrpcap('test.cap',pkts)
+#读
+#rd = rdpcap('test.cap')
+#print(rd[0].summary())
+
+print('==以下是网卡===')
+print(conf.ifaces)  #查看本机上的所有网卡
+print('==以下是路由===')
+print(conf.route)   #查看本机上的所有路由
+
+#考试场景：手工构建
+
+==以下是网卡===
+Source   Index  Name                                            MAC                IPv4             IPv6                     
+libpcap  1      Software Loopback Interface 1                   00:00:00:00:00:00  127.0.0.1        ::1                      
+libpcap  11     VirtualBox Host-Only Ethernet Adapter           0a:00:27:00:00:0b  192.168.56.1     fe80::a498:118d:3f0a:f5c0
+libpcap  13     WAN Miniport (IPv6)                                                                                          
+libpcap  15     WAN Miniport (Network Monitor)                                                                               
+libpcap  19     sdpwintun Tunnel                                                   169.254.244.171  fe80::85f0:5dbf:d4f1:6acf
+libpcap  20     WAN Miniport (IP)                                                                                            
+libpcap  22     Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  d0:39:57:96:f0:1f  7.249.234.101    fe80::2333:279e:33f1:6c69
+libpcap  5      Realtek PCIe GbE Family Controller              74:5d:22:7f:24:a5  192.168.50.1     fe80::9993:808d:3f27:3bfe
+libpcap  6      Microsoft Wi-Fi Direct Virtual Adapter          d2:39:57:96:f0:1f  169.254.19.130   fe80::ed14:61e5:b230:e10e
+libpcap  7      Microsoft Wi-Fi Direct Virtual Adapter #2       f2:39:57:96:f0:1f  169.254.0.140    fe80::4536:4c5:8f60:c09f 
+==以下是路由===
+Network          Netmask          Gateway         Iface                                           Output IP        Metric
+0.0.0.0          0.0.0.0          192.168.50.254  Realtek PCIe GbE Family Controller              192.168.50.1     281   
+0.0.0.0          0.0.0.0          7.249.234.1     Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    45    
+127.0.0.0        255.0.0.0        0.0.0.0         Software Loopback Interface 1                   127.0.0.1        331   
+127.0.0.1        255.255.255.255  0.0.0.0         Software Loopback Interface 1                   127.0.0.1        331   
+127.255.255.255  255.255.255.255  0.0.0.0         Software Loopback Interface 1                   127.0.0.1        331   
+192.168.50.0     255.255.255.0    0.0.0.0         Realtek PCIe GbE Family Controller              192.168.50.1     281   
+192.168.50.1     255.255.255.255  0.0.0.0         Realtek PCIe GbE Family Controller              192.168.50.1     281   
+192.168.50.255   255.255.255.255  0.0.0.0         Realtek PCIe GbE Family Controller              192.168.50.1     281   
+192.168.56.0     255.255.255.0    0.0.0.0         VirtualBox Host-Only Ethernet Adapter           192.168.56.1     281   
+192.168.56.1     255.255.255.255  0.0.0.0         VirtualBox Host-Only Ethernet Adapter           192.168.56.1     281   
+192.168.56.255   255.255.255.255  0.0.0.0         VirtualBox Host-Only Ethernet Adapter           192.168.56.1     281   
+224.0.0.0        240.0.0.0        0.0.0.0         Software Loopback Interface 1                   127.0.0.1        331   
+224.0.0.0        240.0.0.0        0.0.0.0         VirtualBox Host-Only Ethernet Adapter           192.168.56.1     281   
+224.0.0.0        240.0.0.0        0.0.0.0         sdpwintun Tunnel                                169.254.244.171  261   
+224.0.0.0        240.0.0.0        0.0.0.0         Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    301   
+224.0.0.0        240.0.0.0        0.0.0.0         Microsoft Wi-Fi Direct Virtual Adapter          169.254.19.130   281   
+224.0.0.0        240.0.0.0        0.0.0.0         Microsoft Wi-Fi Direct Virtual Adapter #2       169.254.0.140    281   
+224.0.0.0        240.0.0.0        0.0.0.0         Realtek PCIe GbE Family Controller              192.168.50.1     281   
+255.255.255.255  255.255.255.255  0.0.0.0         Software Loopback Interface 1                   127.0.0.1        331   
+255.255.255.255  255.255.255.255  0.0.0.0         VirtualBox Host-Only Ethernet Adapter           192.168.56.1     281   
+255.255.255.255  255.255.255.255  0.0.0.0         sdpwintun Tunnel                                169.254.244.171  261   
+255.255.255.255  255.255.255.255  0.0.0.0         Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    301   
+255.255.255.255  255.255.255.255  0.0.0.0         Microsoft Wi-Fi Direct Virtual Adapter          169.254.19.130   281   
+255.255.255.255  255.255.255.255  0.0.0.0         Microsoft Wi-Fi Direct Virtual Adapter #2       169.254.0.140    281   
+255.255.255.255  255.255.255.255  0.0.0.0         Realtek PCIe GbE Family Controller              192.168.50.1     281   
+7.249.234.0      255.255.254.0    0.0.0.0         Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    301   
+7.249.234.101    255.255.255.255  0.0.0.0         Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    301   
+7.249.235.255    255.255.255.255  0.0.0.0         Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter  7.249.234.101    301   
+
+"""
+12.scapy抓包
+from scapy.all import *
+#通过scapy实现捕获和过滤报文，需要和目的IP互通
+#生成报文
+f = PcapWriter('socket.cap',append=True)
+def callback(pkt):
+    #print(pkt.show())
+    f.write(pkt)
+
+#   wifi口抓公网
+# sniff(filter='icmp and host 202.96.134.133',    #过滤条件抓取指定报文
+#       iface='Realtek RTL8852BE WiFi 6 802.11ax PCIe Adapter',   #  conf.ifaces查看
+#       prn=callback,     #回掉函数
+#       count=20)     #抓多少个包
+
+#   网口抓交换机
+# sniff(filter='icmp and host 192.168.50.254',
+#       iface='Realtek PCIe GbE Family Controller',       #是iface不是提示的ifaces！！！
+#       # 网卡找对！看下上的网口名称
+#       prn=callback,
+#       count=20
+#       )
+
+#   综合抓包，只用本机的话，是Software Loopback Interface 1
+sniff(
+    filter = 'host 192.168.10.1',
+    iface ='Realtek PCIe GbE Family Controller',
+    prn = callback,
+    count = 20
+)
+
+#考试场景：捕获pycharm和交换机的口
+#在pycharm所在主机ping交换机
+
+12.抓包综合_client
+import socket
+import time
+client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+"""
+带宽
+1Mbps=1*1024*1024bps
+"""
+packet_size = 1024*1024
+packet_per_second = 1024*1024*8/packet_size
+
+stat = time.time()  #获取当前的时间
+while time.time()-stat<10:
+    client.sendto('Python'.encode('utf-8'),('localhost',8888))
+    time.sleep(1.0/packet_per_second)
+
+###重点啊！！
+
+12.抓包综合_server
+import socket
+
+server = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+server.bind(('192.168.50.1',8888))
+size = 0
+while True:
+    data,addr = server.recvfrom(1024)
+    size += len(data)
+    print('这是从客户端接受到的报文大小：',size)
+
+13.套接字_udp_client
+import socket
+
+socket_client = socket.socket(
+    socket.AF_INET,socket.SOCK_DGRAM
+)
+while True:
+    send_mes = input('发送给服务端的信息为：')
+    socket_client.sendto(send_mes.encode('utf-8'),('localhost',9999))
+    if send_mes == 'N':
+        break
+    data,addr = socket_client.recvfrom(1024)
+    print('从服务端接收的信息为：',data,addr)
+    if data.decode('utf-8') == 'N':
+        break
+
+13.套接字_udp_server
+import socket
+socket_server = socket.socket(
+    socket.AF_INET,socket.SOCK_DGRAM
+)
+socket_server.bind(('localhost',9999))
+
+while True:
+    conn,addr = socket_server.recvfrom(1024)   #UDP收使用recvfrom
+    print('接受到的客户端信息为：',conn)
+    if conn.decode('utf-8') == 'N':
+        break
+    send_mes = input('发送给客户端的信息为：')
+    socket_server.sendto(send_mes.encode('utf-8'),addr)
+    if send_mes == 'N':
+        break
+
+socket_server.close()
+
+
+#场景：30s内持续发送，使用while一直循环，从开始到现在接受了多少大小的数据，用len()
+#TCP连接是服务端先启动。UDP任一先起皆可。
+
+13.套接字_客户端
+import socket
+#1.创建套接字
+client_socket = socket.socket()
+#2.和服务器建立连接，服务器的IP和端口
+client_socket.connect(('localhost',6666))
+#3.收发，两端配置一致即可，这里配置客户端先发，服务器先收
+while True:
+    mes = input("给服务器发送消息：")
+    client_socket.send(mes.encode('utf-8'))     #发的时候encode
+    if mes == 'N':
+        break
+    rev = client_socket.recv(1024).decode('utf-8')  #收的时候decode
+    print("来自服务器端的数据：",rev)
+
+#本机验证时打开两个cmd
+#   cd C:\Users\yushu\PycharmProjects\huawei\com
+#   python
+
+
+13.套接字_服务端
+#考试时，两台考试电脑间互相通信，一台作为服务器端，一台客户端
+#tcp通信：服务器端
+
+import socket
+#1.创建套接字
+server_socket = socket.socket(
+    socket.AF_INET,socket.SOCK_STREAM       #ipv4，tcp
+)
+server_socket.bind(('localhost',6666))   #源IP，端口号(需大于1024）
+print('等待客户端连接……')
+#打印结果：
+#<socket.socket fd=444, family=2, type=1, proto=0, laddr=('127.0.0.1', 6666), raddr=('127.0.0.1', 51111)> ('127.0.0.1', 51111)
+server_socket.listen(2)     #允许多少个客户端连接，可不配
+conn,client_address = server_socket.accept()      #等待客户端的连接   accept源代码return sock,addr，返回数据，客户端IP
+print('来自客户端的信息：',conn,client_address)
+
+while True:
+    mes = conn.recv(1024).decode('utf-8')    #服务器端能接受客户端发送的最大缓存量
+    print('来自客户端发送的消息：',mes)
+    if mes == 'N':      #如果客户端发送N，结束通信
+        break
+    send_mes = input('输入数据：')
+    conn.send(send_mes.encode('utf-8'))
+
+14.报文提取
+#pip install pyshark
+import pyshark
+import os
+import xlwt
+import pandas
+import openpyxl
+
+"""
+查找
+1.eth中的source
+2.ip中的source、destination、Flags中offset的值
+3.tcp中的sourceport
+4.BGP中的length、type、type code
+把上面的数据写入到excel中
+"""
+wk = xlwt.Workbook()
+sheet = wk.add_sheet('Keywords')
+row = 1
+
+sheet.write(0,0,'filename')
+sheet.write(0,1,'eth_source')
+sheet.write(0,2,'ip_source')
+sheet.write(0,3,'ip_destination')
+sheet.write(0,4,'ip_flags_offset')
+sheet.write(0,5,'tcp_sourceport')
+sheet.write(0,6,'bgp_length')
+sheet.write(0,7,'bgp_type')
+sheet.write(0,8,'bgp_typecode')
+
+path = './BGP/'
+files = os.listdir(path)
+
+for file in files:          #打开每一个文件
+    #打开具体文件 1.数据流文件的路径   2.wireshark安装路径
+    ps = pyshark.FileCapture(path+file,tshark_path='C:\\Program Files\\Wireshark\\Wireshark.exe')   #注意是tshark_path
+    #print(ps)
+    for pkt in ps:      #pkt是数据流中的每一个报文，有ETH,IP,TCP,BGP
+
+        #print(pkt.frame_info)
+        #Frame: pkt.frame_info  #获取frame
+        #Eth:   pkt.eth 大小写没关系
+        #IP:    pkt.ip
+        #TCP:   pkt.tcp
+        #BGP:   pkt.bgp
+        #IPv6:  pkt.ipv6
+
+        try:
+            #print(pkt.eth.get_field_by_showname('Source'))      #这个报错可以不理会RuntimeError: This event loop is already running
+            #print(pkt.ip.get_field_by_showname('Source Address'))
+            #print(pkt.ip.get_field_by_showname('Destination Address'))
+            #print(pkt.ip.get_field_by_showname('Flags'))
+            #print(pkt.tcp.get_field_by_showname('Source Port'))
+            #print(pkt.bgp.get_field_by_showname('Length'))
+
+            sheet.write(row,0,file)
+
+            eth_source = pkt.eth.get_field_by_showname('Source')
+            sheet.write(row,1,eth_source)
+            # ip_source = pkt.ip.get_field_by_showname('Source Address')
+            # sheet.write(row,2,ip_source)
+
+        except Exception:
+            #print('ip|tcp|bgp不存在！')
+            sheet.write(row,1,'eth不存在！')
+
+        try:
+            ip_source = pkt.ip.get_field_by_showname('Source Address')
+            sheet.write(row,2,ip_source)
+            ip_destination = pkt.ip.get_field_by_showname('Destination Address')
+            sheet.write(row,3,ip_destination)
+            ip_flags_offset = pkt.ip.get_field_by_showname('...0 0000 0000 0000 = Fragment Offset')
+            sheet.write(row,4,ip_flags_offset)
+
+        except Exception:
+            sheet.write(row,2,'ip不存在！')
+            sheet.write(row,3,'ip不存在！')
+            sheet.write(row,4,'ip不存在！')
+
+        try:
+            tcp_sourceport = pkt.tcp.get_field_by_showname('Source Port')
+            sheet.write(row,5,tcp_sourceport)
+        except Exception:
+            sheet.write(row,5,'tcp不存在！')
+
+        try:
+            bgp_length = pkt.bgp.get_field_by_showname('Length')
+            sheet.write(row, 6, bgp_length)
+            bgp_type = pkt.bgp.get_field_by_showname('Type')
+            sheet.write(row, 7, bgp_type)
+            bgp_typecode = pkt.bgp.get_field_by_showname('Type Code')
+            sheet.write(row, 8, bgp_typecode)
+        except Exception:
+            sheet.write(row,6,'bgp不存在！')
+            sheet.write(row,7,'bgp不存在！')
+            sheet.write(row,8,'bgp不存在！')
+
+        row += 1
+
+wk.save('报文提取.xls')
+
+df = pandas.read_excel('报文提取.xls')
+df['bgp_length']=df['bgp_length'].astype(int)
+df2 = df.sort_values('bgp_length',ascending=True)
+df2.to_excel('报文提取排序版.xlsx')
+#df2.to_excel('报文提取排序版.xls')    报错：ValueError: No engine for filetype: 'xls'
+#df2.to_excel('报文提取排序版.xlsx')   报错：ModuleNotFoundError: No module named 'openpyxl'
+
+
+#Q1.有的报文里有好几个bgp，但只打印第一个
+#Q2.bgp_type和bgp_typecode打印的都是数字4，没包含字符串
+#       Type: KEEPALIVE Message (4)
+#因为get_field_by_showname方法默认是返回第一个layer层对应字段的数值？
+
+实操
+import paramiko
+import time
+from pysnmp.hlapi import *
+from scapy.all import *
+from scapy.layers.inet import TCP,UDP,IP,ICMP,Ether
+import pyshark
+import xlwt
+
+
+def client1():
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect('192.168.56.101',22,'huawei','Admin@123')
+    cmd = client.invoke_shell()
+    cmd.send('screen-length 0 temporary\n')
+    time.sleep(1)
+    cmd.send('sys\n')
+    time.sleep(1)
+    cmd.send('int vlanif 1\n')
+    time.sleep(1)
+    cmd.send('ip add 192.168.255.1 30\n')   #测试用ip add 192.168.255.1 32会报错Error: The specified IP address is invalid.
+    time.sleep(1)
+    cmd.send('int GE 1/0/5\n')              #CE12800没有/10和/20的口就用了/5和/6
+    time.sleep(1)
+    cmd.send('undo portswitch\n')
+    time.sleep(1)
+    cmd.send('ip add 10.1.1.1 24\n')
+    time.sleep(1)
+    cmd.send('int GE 1/0/6\n')
+    time.sleep(1)
+    cmd.send('undo portswitch\n')
+    time.sleep(1)
+    cmd.send('ip add 10.1.2.1 24\n')
+    time.sleep(1)
+    cmd.send('q\n')
+    time.sleep(1)
+    cmd.send('ip route-static 0.0.0.0 0 Null0\n')
+    time.sleep(1)
+    cmd.send('comm\n')
+    time.sleep(3)
+    cmd.send('dis ip int brie\n')
+    time.sleep(3)
+    cmd.send('dis ip routing-table\n')
+    time.sleep(3)
+    print(cmd.recv(65536).decode('utf-8'))
+    cmd.close()
+#client1()
+
+
+def client2():
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect('192.168.56.102',22,'huawei','Admin@123')
+    cmd = client.invoke_shell()
+    cmd.send('screen-length 0 temporary\n')
+    time.sleep(1)
+    cmd.send('sys\n')
+    time.sleep(1)
+    cmd.send('int vlanif 1\n')
+    time.sleep(1)
+    cmd.send('ip address 192.168.255.2 30\n')
+    time.sleep(1)
+    cmd.send('commit\n')
+    time.sleep(1)
+    cmd.send('dis ip int brie\n')
+    time.sleep(3)
+    print(cmd.recv(65535).decode('utf-8'))
+    cmd.close()
+
+#client2()
+
+def write_file():
+    f = open('SNMPV3.cfg','w',encoding='utf-8')
+    f.close()
+#write_file()
+
+def UpLoad1():
+    trans = paramiko.Transport(('192.168.56.101',22))
+    trans.connect(None,'huawei','Admin@123')
+    sftp = paramiko.SFTPClient.from_transport(trans)
+    sftp.put('SNMPV3.cfg','SNMPV3.cfg')
+    sftp.close()
+#UpLoad1()
+
+def client1_verify():
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect('192.168.56.101',22,'huawei','Admin@123')
+    cmd = client.invoke_shell()
+    cmd.send('dir\n')
+    time.sleep(1)
+    print(cmd.recv(65535).decode('utf-8'))
+    cmd.close()
+#client1_verify()
+
+def UpLoad2():
+    trans = paramiko.Transport(('192.168.56.102',22))
+    trans.connect(None,'huawei','Admin@123')
+    sftp = paramiko.SFTPClient.from_transport(trans)
+    sftp.put('SNMPV3.cfg','SNMPV3.cfg')
+    sftp.close()
+#UpLoad2()
+
+result1 = getCmd(
+    SnmpEngine(),
+    UsmUserData(
+        'admin',
+        'Huawei@123',
+        'Huawei@123',
+        authProtocol=usmHMACSHAAuthProtocol,
+        privProtocol=usmAesCfb128Protocol),
+    UdpTransportTarget(('192.168.56.101',161)),
+    ContextData(),
+    ObjectType(ObjectIdentity('1.3.6.1.2.1.1.5.0')) #怎么知道hwEntityCpuUsage对应的mib？
+)
+#print(next(result1)[3][0])
+
+result2=getCmd(
+    SnmpEngine(),
+    UsmUserData(
+        'admin',
+        'Huawei@123',
+        'Huawei@123',
+        authProtocol=usmHMACSHAAuthProtocol,
+        privProtocol=usmAesCfb128Protocol),
+    UdpTransportTarget(('192.168.56.102',161)),
+    ContextData(),
+    (ObjectType(ObjectIdentity('1.3.6.1.2.1.1.5.0'))
+    )
+)
+#print(next(result2)[3][0])
+
+def runningstate():
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect('192.168.56.101',22,'huawei','Admin@123')
+    cmd = client.invoke_shell()
+    cmd.send('screen-length 0 temporary\n')
+    time.sleep(1)
+    cmd.send('dis clock\n')
+    time.sleep(1)
+    cmd.send('dis device\n')
+    time.sleep(1)
+    cmd.send('dis health\n')
+    time.sleep(1)
+    cmd.send('dis power\n')
+    time.sleep(1)
+    cmd.send('dis fan\n')
+    time.sleep(1)
+
+    f = open('../.venv/command.txt','w',encoding='utf-8')
+    f.write(cmd.recv(65535).decode('utf-8'))
+
+#runningstate()
+
+# pkts = []
+# for i in range(7500):
+#     pkt = (Ether()/IP(src='192.168.56.101',dst='192.168.56.102')/TCP(sport=1000,dport=22))
+#     pkts.append(pkt)
+#cap = wrpcap('icmp.cap',pkts)
+
+wk = xlwt.Workbook()
+sheet = wk.add_sheet('sheeta')
+sheet.write(0,0,'Eth_Source')
+sheet.write(0,1,'TCP_SrcPort')
+row = 1
+ps = pyshark.FileCapture('icmp.cap',tshark_path='C:\\Program Files\\Wireshark\\Wireshark.exe')
+for p in ps:
+    try:
+        eth_source = p.eth.get_field_by_showname('Source')
+        sheet.write(row,0,eth_source)
+    except Exception as e:
+        sheet.write(row,0,'eth_source不存在')
+    try:
+        tcp_srcport = p.tcp.get_field_by_showname('Source Port')
+        sheet.write(row, 1, tcp_srcport)
+    except Exception as e:
+        sheet.write(row,1,'tcp_srcport不存在')
+    row += 1
+wk.save('实操.xls')
+</p>
+    </div>
+
+    <script>
+        document.getElementById("showTextLink").addEventListener("click", function() {
+            document.getElementById("historicalText").style.display = "block";
+        });
+    </script>
+
+</body>
+</html>
+
